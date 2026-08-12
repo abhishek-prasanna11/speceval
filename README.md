@@ -24,8 +24,15 @@ Two failure modes follow, and they are distinct:
    question asked about.
 
 So: **does version- and authority-aware reranking reduce those errors, and what does it cost in
-retrieval recall?** The cost is the interesting half. Filtering hard on authority must eventually
-starve the retriever of legitimate context.
+retrieval recall?** The cost was expected to be the interesting half — filtering hard on
+authority should eventually starve the retriever of legitimate context.
+
+**It does not, and that is the study's main result.** On this corpus reranking eliminated
+rank-1 retrieval of superseded documents while *improving* recall and nDCG. The premise was
+wrong for a specific and checkable reason: reranking reorders a fixed candidate pool rather
+than discarding documents, and supersession pairs are topically near-identical, so whatever
+retrieved the dead PEP also retrieved its live successor. See
+[`notes/phase4.md`](notes/phase4.md) §5 for where the premise *would* have held.
 
 ## Why PEPs
 
@@ -127,10 +134,31 @@ run-to-run variance is zero):
 |---|---|---|---|---|---|
 | BM25 | 0.275 | 0.686 | 0.429 | **0.000** | 11.7 s |
 | Dense | 0.235 | 0.686 | 0.429 | **0.000** | 13.8 s |
-| Hybrid | 0.235 | **0.765** | **0.571** | **0.000** | 13.7 s |
-| Hybrid + reranking | — | — | — | — | — |
+| Hybrid | 0.235 | 0.765 | 0.571 | **0.000** | 13.7 s |
+| **Hybrid + reranking** (λ=1) | **0.039** | **0.863** | 0.714 | **0.000** | — |
 
 Harness validation, run as tests: Oracle scores 1.000/1.000, Random scores 0.000/0.000.
+
+**Rung 4, swept.** The reranker's strength is a knob, so the result is a curve. Retrieval level:
+
+| λ | Recall@10 | nDCG@10 | trap@1 | trap@1 (traps only) |
+|---|---|---|---|---|
+| 0 | 0.951 | 0.771 | 0.294 | 0.550 |
+| 0.02 | 0.951 | 0.803 | 0.137 | 0.350 |
+| 0.10 | 0.971 | 0.831 | 0.059 | 0.150 |
+| 0.25 | **0.980** | **0.856** | 0.020 | 0.050 |
+| 0.50 | **0.980** | 0.852 | **0.000** | **0.000** |
+| 1.00 | 0.961 | 0.840 | 0.000 | 0.000 |
+
+Answer level, against the in-pipeline λ=0 control (**not** the rung-3 row above — the reranker
+draws a 10x deeper pool before fusing, and λ=0 shared only 1 of 51 prompts with rung 3):
+
+| λ | Superseded-cite ↓ | Authoritative ↑ | Trap subset: superseded ↓ |
+|---|---|---|---|
+| 0 | 0.157 | 0.765 | 0.300 |
+| 0.05 | **0.235** | **0.725** | **0.450** |
+| 0.25 | 0.078 | 0.824 | 0.150 |
+| 1.00 | **0.039** | **0.863** | **0.050** |
 
 **Finding — better retrieval did not buy better authority.** Dense beats BM25 on every
 retrieval metric (rank-1 accuracy 66.7% vs 51.1%). But split by subset, that advantage
@@ -170,12 +198,36 @@ mismatched in unit and in depth, and the ranking of strategies inverted.
 PEP. Grounding is not the failure mode here; authority is. The model does not invent sources,
 it faithfully cites dead ones.
 
-**Stated carefully:** several of these gaps are one or two answers and are not findings — the
-Dense-vs-BM25 superseded-citation gap is exactly two, and the version metric rests on 7
-queries. The robust results are the subset gap, the retrieval-vs-answer inversion, and the
-zero hallucination rate. Full analysis, two limitations of the metrics themselves, and the
-failed Phase 1 prediction in [`notes/phase2.md`](notes/phase2.md) and
-[`notes/phase3.md`](notes/phase3.md).
+**Finding — no tradeoff, over the whole useful range.** Between λ=0 and λ=0.5, trap@1 goes
+0.294 → 0.000 while Recall@10 *rises* 0.951 → 0.980 and nDCG@10 *rises* 0.771 → 0.856.
+Everything improves together. Recall only turns back down at extreme strength (one query), and
+even λ=1 still beats the baseline on both retrieval metrics. At the answer level, superseded
+citations fall 0.157 → 0.039 (**8 of 51 answers → 2**) while authoritative citations rise
+0.765 → 0.863. Per query: **6 fixed, 0 broken**, five of the six on trap queries.
+
+**Finding — partial reranking is worse than none.** λ=0.05 is worse than λ=0 on both answer
+metrics (superseded 0.235 vs 0.157, authoritative 0.725 vs 0.765), reversing cleanly by λ=0.25.
+The knob is past the ~0.0165 threshold where adjacent pairs flip but short of the ~0.25 needed
+to promote a live document from deeper in the pool — enough force to disturb the ordering, not
+enough to repair it. Only visible because the grid was fine at the low end; a uniform 0.25-step
+sweep would have reported clean monotonic improvement and missed a regime where the intervention
+actively hurts.
+
+**Finding — the naive version rule is harmful, as predicted.** Penalising a PEP whose
+`Python-Version` postdates the asked version changes authority not at all (0.039) and makes both
+other metrics worse (authoritative 0.863 → 0.804, version 0.714 → 0.571). Answering "no, it
+arrived in 3.8" requires retrieving the very document the rule demotes. Version metadata tells
+you what the answer must *say*, not which document to trust.
+
+**Stated carefully.** At n=51 the headline is 8 answers → 2, and several smaller gaps are one or
+two answers: the Dense-vs-BM25 superseded gap is two, the λ=0.05 regression is four, and the
+version metric rests on 7 queries. The 6-fixed / 0-broken split is the most robust form of the
+main claim because it does not depend on rates. The status weights (`Draft = 0.55`,
+`Deferred = 0.25`) are hand-chosen judgements with no sensitivity analysis — the most
+substantive untested assumption in the study. Two of three predictions made along the way were
+wrong and are recorded as wrong. Full analysis in
+[`notes/phase2.md`](notes/phase2.md), [`notes/phase3.md`](notes/phase3.md) and
+[`notes/phase4.md`](notes/phase4.md).
 
 ## Roadmap
 
@@ -187,8 +239,9 @@ failed Phase 1 prediction in [`notes/phase2.md`](notes/phase2.md) and
 - [x] **Phase 3** — Generation over the retrieved context, and the answer-level citation
       metrics. Baseline error rates established.
       *(Done: 84 tests, 153 answers, gold set 51 queries incl. 7 version-scoped.)*
-- [ ] **Phase 4** — Version/authority reranking with tunable strength. Sweep it, produce the
+- [x] **Phase 4** — Version/authority reranking with tunable strength. Sweep it, produce the
       tradeoff curve and the results table. Error analysis on losses.
+      *(Done: 103 tests, 11-point retrieval sweep, 4-point answer sweep, version-rule ablation.)*
 
 ## What this is not
 
@@ -243,6 +296,7 @@ ollama serve &                               # required from Phase 2: embeddings
 .venv/bin/python scripts/verify_gold.py      # re-derive every gold label from the corpus
 .venv/bin/python run_phase2.py               # the ladder, retrieval level
 .venv/bin/python run_phase3.py               # the ladder, answer level (153 generations)
+.venv/bin/python run_phase4.py               # rung 4: strength sweep + tradeoff curve
 ```
 
 `requirements.txt` carries a loose floor; `requirements-lock.txt` pins the exact versions
@@ -252,12 +306,15 @@ under `.cache/`, so later runs start instantly.
 
 ## Status
 
-**Phases 1–3 complete (2026-08-13).** Corpus ingestion, chunking, hand-rolled BM25, dense
-retrieval, RRF hybrid fusion, generation with four header-derived answer metrics, the metric
-harness and its validation, a 51-query gold set with every label re-derived from the corpus by
-`scripts/verify_gold.py`, and 84 tests passing. Rungs 1–3 are measured at both the retrieval
-and the answer level.
+**All four phases complete (2026-08-13).** Four rungs, one metric set, 51 verified queries,
+~460 generated answers, 103 tests. Every metric derived from PEP headers — no LLM judge and no
+hand-grading anywhere on the primary path.
 
-Phase 4 next: rung 4, version/authority reranking with a tunable strength parameter, judged on
-the answer-level metrics — since the retrieval metrics have now demonstrably ranked the rungs
-in the wrong order once.
+The headline: authority-aware reranking cut answers citing superseded specifications from
+15.7% to 3.9% (8 of 51 → 2; 6 fixed, 0 broken) and eliminated rank-1 retrieval of superseded
+documents entirely, while *improving* Recall@10 from 0.951 to 0.980 — the recall/authority
+tradeoff the study was built to measure did not exist on this corpus, for a reason the notes
+work out and bound.
+
+Optional next steps are in Future improvements below; the study answers its question as it
+stands.
