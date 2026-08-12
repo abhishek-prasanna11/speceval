@@ -1,0 +1,115 @@
+[
+  {
+    "qid": "q01",
+    "text": "can I use structural pattern matching in Python 3.9",
+    "category": "availability",
+    "relevant": [634, 636],
+    "python_version": "3.9",
+    "note": "Trap: PEP 622 is titled exactly 'Structural Pattern Matching' and is Superseded by 634. Correct answer is no -- 3.10."
+  },
+  {
+    "qid": "q02",
+    "text": "what does the walrus operator := do",
+    "category": "identifier",
+    "relevant": [572],
+    "note": "PEP 572, Final, 3.8."
+  },
+  {
+    "qid": "q03",
+    "text": "why was the print statement changed into a function",
+    "category": "rationale",
+    "relevant": [3105],
+    "note": "PEP 3105, Final, 3.0."
+  },
+  {
+    "qid": "q04",
+    "text": "which Python version added f-strings for literal string interpolation",
+    "category": "availability",
+    "relevant": [498],
+    "python_version": "3.6",
+    "note": "PEP 498, Final, 3.6."
+  },
+  {
+    "qid": "q05",
+    "text": "how do I write a union type using the pipe operator",
+    "category": "identifier",
+    "relevant": [604],
+    "python_version": "3.10",
+    "note": "PEP 604, Final, 3.10."
+  },
+  {
+    "qid": "q06",
+    "text": "does Python have a switch case statement",
+    "category": "rationale",
+    "relevant": [3103, 634],
+    "note": "Trap: PEP 3103 is Rejected. The live answer is match/case via 634."
+  },
+  {
+    "qid": "q07",
+    "text": "what are data classes and how are they declared",
+    "category": "identifier",
+    "relevant": [557],
+    "python_version": "3.7",
+    "note": "PEP 557, Final, 3.7."
+  },
+  {
+    "qid": "q08",
+    "text": "why does Python use structural subtyping for protocols instead of nominal typing",
+    "category": "rationale",
+    "relevant": [544],
+    "note": "PEP 544, Final, 3.8."
+  },
+  {
+    "qid": "q09",
+    "text": "when did true division become the default behaviour of the division operator",
+    "category": "availability",
+    "relevant": [238],
+    "python_version": "3.0",
+    "note": "PEP 238, Final, 2.2 -- staged, default in 3.0."
+  },
+  {
+    "qid": "q10",
+    "text": "how are coroutines defined with async and await syntax",
+    "category": "identifier",
+    "relevant": [492],
+    "python_version": "3.5",
+    "note": "PEP 492, Final, 3.5."
+  },
+  {
+    "qid": "q11",
+    "text": "what are the conventions for writing docstrings",
+    "category": "identifier",
+    "relevant": [257],
+    "note": "PEP 257, Active."
+  },
+  {
+    "qid": "q12",
+    "text": "are template literal strings available in Python",
+    "category": "availability",
+    "relevant": [750],
+    "python_version": "3.14",
+    "note": "Trap: PEP 501 is Withdrawn and Superseded-By 750. Only 750 (Final, 3.14) is authoritative."
+  },
+  {
+    "qid": "q13",
+    "text": "how were function annotations specified before type hints",
+    "category": "rationale",
+    "relevant": [3107, 484],
+    "note": "PEP 3107 (3.0) introduced the syntax; PEP 484 (3.5) gave it typing semantics."
+  },
+  {
+    "qid": "q14",
+    "text": "what is the recommended maximum line length for Python code",
+    "category": "identifier",
+    "relevant": [8],
+    "note": "PEP 8, Active."
+  },
+  {
+    "qid": "q15",
+    "text": "what does the revised buffer protocol change",
+    "category": "rationale",
+    "relevant": [3118],
+    "python_version": "3.0",
+    "note": "PEP 3118, Final, 3.0."
+  }
+]
