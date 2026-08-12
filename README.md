@@ -80,13 +80,14 @@ exists to measure.
 |---|---|
 | **Recall@K** | Fraction of a query's labelled-relevant chunks appearing in the top K. K = 10 |
 | **nDCG@K** | Standard normalised DCG, binary relevance, log₂ discount. K = 10 |
-| **Superseded-citation rate** | % of answers citing a PEP whose `Status` ∈ {`Rejected`, `Withdrawn`, `Superseded`, `Deferred`} |
-| **Version correctness** | % of version-scoped answers valid for the Python version named in the query, checked against `Python-Version` |
-| **Answer correctness (sampled)** | Hand-graded on a ~30-query subset. Reported as a **sample**, not a full metric |
+| **Superseded-citation rate** | % of answers citing a PEP whose `Status` ∈ {`Rejected`, `Withdrawn`, `Superseded`, `Deferred`}. Measures citation hygiene, **not** answer truth — a correct conclusion drawn from a dead source still counts as a failure |
+| **Authoritative-citation rate** | % of answers citing a gold-labelled PEP |
+| **Version-correct rate** | Of the version-scoped queries, % whose answer surfaces the release the feature actually landed in. Deliberately narrow: it checks the right version *appears*, not that the surrounding claim is true |
+| **Hallucinated-citation rate** | % of answers citing a PEP number absent from the corpus — a grounding check rather than an authority one |
 | **Latency** | p50 / p95, **retrieval measured separately from end-to-end** — generation otherwise swamps every difference between the four strategies |
 
-The first four are computed **automatically from PEP headers**. No LLM judge and no human grading
-on the primary path; that is the single choice that keeps this project small.
+Every answer-level metric is computed **automatically from PEP headers**. No LLM judge and no
+human grading on the primary path; that is the single choice that keeps this project small.
 
 ## Method notes
 
@@ -105,23 +106,31 @@ Three things separate measured results from asserted ones:
 
 ## Results
 
-Rungs 1–3 measured on 45 gold queries. The citation metrics arrive with generation in
-Phase 3.
+Rungs 1–3 measured on 51 gold queries, at both the retrieval and the answer level.
 
 **Corpus:** 734 PEPs → 19,763 chunks. 519 (71%) carry `Python-Version`; 31 carry
 `Superseded-By`. **262 PEPs (36%) are non-authoritative** — Rejected 131, Withdrawn 70,
 Deferred 36, Superseded 25. That is the trap surface.
 
-| Strategy | Recall@10 | nDCG@10 | trap@1 | Superseded-cite | Version-correct | Retrieval p95 |
-|---|---|---|---|---|---|---|
-| BM25 | 0.889 | 0.710 | 0.289 | — | — | 18.0 ms |
-| Dense | **0.967** | **0.830** | **0.244** | — | — | 40.7 ms |
-| Hybrid | 0.944 | 0.810 | 0.289 | — | — | 20.2 ms |
-| Hybrid + reranking | — | — | — | — | — | — |
+**Retrieval level** (45-query set; `trap@1` = fraction whose rank-1 PEP is non-authoritative):
 
-`trap@1` = fraction of queries whose rank-1 PEP is non-authoritative — a retrieval-side
-proxy for the Phase 3 citation metrics. Harness validation, run as tests: Oracle scores
-1.000/1.000, Random scores 0.000/0.000.
+| Strategy | Recall@10 | nDCG@10 | trap@1 | Retrieval p95 |
+|---|---|---|---|---|
+| BM25 | 0.889 | 0.710 | 0.289 | 18.0 ms |
+| Dense | **0.967** | **0.830** | **0.244** | 40.7 ms |
+| Hybrid | 0.944 | 0.810 | 0.289 | 20.2 ms |
+
+**Answer level** (51 queries, 153 generated answers, temperature 0 and a fixed seed so
+run-to-run variance is zero):
+
+| Strategy | Superseded-cite ↓ | Authoritative ↑ | Version ↑ | Hallucinated ↓ | End-to-end p95 |
+|---|---|---|---|---|---|
+| BM25 | 0.275 | 0.686 | 0.429 | **0.000** | 11.7 s |
+| Dense | 0.235 | 0.686 | 0.429 | **0.000** | 13.8 s |
+| Hybrid | 0.235 | **0.765** | **0.571** | **0.000** | 13.7 s |
+| Hybrid + reranking | — | — | — | — | — |
+
+Harness validation, run as tests: Oracle scores 1.000/1.000, Random scores 0.000/0.000.
 
 **Finding — better retrieval did not buy better authority.** Dense beats BM25 on every
 retrieval metric (rank-1 accuracy 66.7% vs 51.1%). But split by subset, that advantage
@@ -143,10 +152,30 @@ alone, against the received wisdom that hybrid beats either component. The likel
 that RRF weights both systems equally while BM25 is substantially weaker here, and a
 rank-only rule cannot express "trust dense more".
 
-**Stated carefully:** at n=45, several of these gaps are one or two queries and are not
-findings. The subset split and the divergence mechanism are the robust parts; the exact
-margins are not. Full analysis, the failed Phase 1 prediction, and limitations in
-[`notes/phase2.md`](notes/phase2.md).
+**Finding — roughly one answer in four cites a dead specification.** 23.5%–27.5% overall,
+rising to **40%–50% on trap queries** and falling to 10%–13% on ordinary ones. That ~4x gap
+is what the trap/ordinary split was built to expose, and it is the number rung 4 has to move.
+
+**Finding — the retrieval metrics did not predict answer quality.** Phase 2 concluded hybrid
+fusion bought nothing over dense and was the rung to drop. At the answer level hybrid is the
+*best* rung: authoritative-citation 0.765 vs 0.686, version 0.571 vs 0.429. Same corpus, same
+queries, opposite conclusion. The cause is a measurement mismatch, not a mystery — retrieval
+was scored on the top-10 distinct *PEPs* while generation consumes the top-5 *chunks*, so
+fusion's chunk-level reordering packs better evidence into the window that actually matters
+and Recall@10 cannot see it. **The general lesson: a retrieval metric is only as faithful a
+proxy as the match between what it scores and what the generator consumes.** Ours were
+mismatched in unit and in depth, and the ranking of strategies inverted.
+
+**Finding — zero hallucinated citations in 153 answers.** Every citation resolved to a real
+PEP. Grounding is not the failure mode here; authority is. The model does not invent sources,
+it faithfully cites dead ones.
+
+**Stated carefully:** several of these gaps are one or two answers and are not findings — the
+Dense-vs-BM25 superseded-citation gap is exactly two, and the version metric rests on 7
+queries. The robust results are the subset gap, the retrieval-vs-answer inversion, and the
+zero hallucination rate. Full analysis, two limitations of the metrics themselves, and the
+failed Phase 1 prediction in [`notes/phase2.md`](notes/phase2.md) and
+[`notes/phase3.md`](notes/phase3.md).
 
 ## Roadmap
 
@@ -155,8 +184,9 @@ margins are not. Full analysis, the failed Phase 1 prediction, and limitations i
       *(Done: baseline measured.)*
 - [x] **Phase 2** — Dense retrieval (brute-force cosine) and hybrid fusion. Rungs 1–3 measured.
       *(Done: 57 tests, gold set expanded to 45 verified queries, 18 of them trap cases.)*
-- [ ] **Phase 3** — Generation over the retrieved context, and the two
-      automatic citation metrics. Baseline error rates established.
+- [x] **Phase 3** — Generation over the retrieved context, and the answer-level citation
+      metrics. Baseline error rates established.
+      *(Done: 84 tests, 153 answers, gold set 51 queries incl. 7 version-scoped.)*
 - [ ] **Phase 4** — Version/authority reranking with tunable strength. Sweep it, produce the
       tradeoff curve and the results table. Error analysis on losses.
 
@@ -210,7 +240,9 @@ python3 -m venv .venv                        # project-local, so versions are pi
 .venv/bin/python run_phase1.py                   # corpus stats + BM25 baseline
 
 ollama serve &                               # required from Phase 2: embeddings
-.venv/bin/python run_phase2.py               # the ladder: BM25 / Dense / Hybrid
+.venv/bin/python scripts/verify_gold.py      # re-derive every gold label from the corpus
+.venv/bin/python run_phase2.py               # the ladder, retrieval level
+.venv/bin/python run_phase3.py               # the ladder, answer level (153 generations)
 ```
 
 `requirements.txt` carries a loose floor; `requirements-lock.txt` pins the exact versions
@@ -220,9 +252,12 @@ under `.cache/`, so later runs start instantly.
 
 ## Status
 
-**Phases 1–2 complete (2026-08-13).** Corpus ingestion, chunking, hand-rolled BM25, dense
-retrieval, RRF hybrid fusion, the metric harness and its validation, a 45-query gold set
-with every label re-derived from the corpus by `scripts/verify_gold.py`, and 57 tests
-passing. Rungs 1–3 of the ladder are measured.
+**Phases 1–3 complete (2026-08-13).** Corpus ingestion, chunking, hand-rolled BM25, dense
+retrieval, RRF hybrid fusion, generation with four header-derived answer metrics, the metric
+harness and its validation, a 51-query gold set with every label re-derived from the corpus by
+`scripts/verify_gold.py`, and 84 tests passing. Rungs 1–3 are measured at both the retrieval
+and the answer level.
 
-Phase 3 next: generation, plus the superseded-citation and version-correctness metrics.
+Phase 4 next: rung 4, version/authority reranking with a tunable strength parameter, judged on
+the answer-level metrics — since the retrieval metrics have now demonstrably ranked the rungs
+in the wrong order once.

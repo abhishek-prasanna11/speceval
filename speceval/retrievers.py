@@ -45,7 +45,7 @@ class Query:
     text: str
     category: str
     relevant: frozenset[int]
-    python_version: str | None = None
+    asked_version: str | None = None
     # True when the corpus contains a superseded/rejected predecessor that a naive
     # retriever is likely to surface instead of the answer. Reported as its own subset:
     # authority reranking must be measurable on the queries it cannot help, or its benefit
@@ -62,7 +62,7 @@ def load_queries(path: Path | str) -> list[Query]:
             text=record["text"],
             category=record["category"],
             relevant=frozenset(record["relevant"]),
-            python_version=record.get("python_version"),
+            asked_version=record.get("asked_version"),
             trap=bool(record.get("trap", False)),
             note=record.get("note", ""),
         )

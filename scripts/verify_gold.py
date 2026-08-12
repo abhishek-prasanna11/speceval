@@ -13,6 +13,7 @@ Exits non-zero on any inconsistency, so it can gate a commit.
 from __future__ import annotations
 
 import json
+import re
 import sys
 from collections import Counter
 from pathlib import Path
@@ -20,6 +21,7 @@ from pathlib import Path
 REPO_ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(REPO_ROOT))
 
+from speceval.answer_metrics import release_version as _release_version  # noqa: E402
 from speceval.corpus import NON_AUTHORITATIVE, load_corpus  # noqa: E402
 
 CATEGORIES = {"availability", "identifier", "rationale"}
@@ -88,14 +90,30 @@ def main() -> int:
                     f"{qid}: marked trap but no superseded/rejected PEP links to {sorted(labelled)}"
                 )
 
-        version = record.get("python_version")
+        # asked_version means exactly one thing: a Python version named in the query text.
+        # It must not be confused with the version the *answer* involves -- conflating the
+        # two silently corrupts the version metric, since a trap query deliberately asks
+        # about a version predating the feature.
+        version = record.get("asked_version")
         if version:
-            for number in relevant:
-                pep = peps.get(number)
-                if pep and pep.python_version and version not in (pep.python_version or ""):
-                    # Informational: the query's version need not equal the PEP's, since a
-                    # query may deliberately ask about a version predating the feature.
-                    pass
+            if version not in record.get("text", ""):
+                problems.append(
+                    f"{qid}: asked_version {version!r} does not appear in the query text"
+                )
+            # The version metric needs a concrete availability version to check against.
+            if not any(
+                _release_version(peps[n].python_version)
+                for n in relevant
+                if n in peps
+            ):
+                problems.append(
+                    f"{qid}: version-scoped but no labelled PEP has a parseable "
+                    f"Python-Version, so version correctness cannot be scored"
+                )
+        elif re.search(r"\b\d+\.\d+\b", record.get("text", "")):
+            problems.append(
+                f"{qid}: query text names a version but asked_version is unset"
+            )
 
     categories = Counter(record.get("category") for record in records)
     traps = sum(1 for record in records if record.get("trap"))

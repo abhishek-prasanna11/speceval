@@ -1,49 +1,523 @@
 [
-  {"qid": "q01", "text": "can I use structural pattern matching in Python 3.9", "category": "availability", "relevant": [634, 636], "python_version": "3.9", "trap": true, "note": "PEP 622 is titled exactly 'Structural Pattern Matching' and is Superseded by 634. Correct answer: no, 3.10."},
-  {"qid": "q02", "text": "what does the walrus operator := do", "category": "identifier", "relevant": [572], "python_version": "3.8", "trap": false, "note": "PEP 572, Final, 3.8."},
-  {"qid": "q03", "text": "why was the print statement changed into a function", "category": "rationale", "relevant": [3105], "trap": false, "note": "PEP 3105, Final, 3.0."},
-  {"qid": "q04", "text": "which Python version added f-strings for literal string interpolation", "category": "availability", "relevant": [498], "python_version": "3.6", "trap": false, "note": "PEP 498, Final, 3.6."},
-  {"qid": "q05", "text": "how do I write a union type using the pipe operator", "category": "identifier", "relevant": [604], "python_version": "3.10", "trap": false, "note": "PEP 604, Final, 3.10."},
-  {"qid": "q06", "text": "does Python have a switch case statement", "category": "rationale", "relevant": [3103, 634], "trap": true, "note": "PEP 3103 is Rejected. The live answer is match/case via 634."},
-  {"qid": "q07", "text": "what are data classes and how are they declared", "category": "identifier", "relevant": [557], "python_version": "3.7", "trap": false, "note": "PEP 557, Final, 3.7."},
-  {"qid": "q08", "text": "why does Python use structural subtyping for protocols instead of nominal typing", "category": "rationale", "relevant": [544], "trap": false, "note": "PEP 544, Final, 3.8."},
-  {"qid": "q09", "text": "when did true division become the default behaviour of the division operator", "category": "availability", "relevant": [238], "python_version": "3.0", "trap": false, "note": "PEP 238, Final, 2.2, default in 3.0."},
-  {"qid": "q10", "text": "how are coroutines defined with async and await syntax", "category": "identifier", "relevant": [492], "python_version": "3.5", "trap": false, "note": "PEP 492, Final, 3.5."},
-  {"qid": "q11", "text": "what are the conventions for writing docstrings", "category": "identifier", "relevant": [257], "trap": false, "note": "PEP 257, Active."},
-  {"qid": "q12", "text": "are template literal strings available in Python", "category": "availability", "relevant": [750], "python_version": "3.14", "trap": true, "note": "PEP 501 is Withdrawn, Superseded-By 750. Only 750 (Final, 3.14) is authoritative."},
-  {"qid": "q13", "text": "how were function annotations specified before type hints", "category": "rationale", "relevant": [3107, 484], "trap": false, "note": "3107 (3.0) introduced the syntax; 484 (3.5) gave it typing semantics."},
-  {"qid": "q14", "text": "what is the recommended maximum line length for Python code", "category": "identifier", "relevant": [8], "trap": false, "note": "PEP 8, Active."},
-  {"qid": "q15", "text": "what does the revised buffer protocol change", "category": "rationale", "relevant": [3118], "python_version": "3.0", "trap": false, "note": "PEP 3118, Final, 3.0."},
-
-  {"qid": "q16", "text": "how do I postpone the evaluation of annotations", "category": "availability", "relevant": [649], "python_version": "3.14", "trap": true, "note": "PEP 563 'Postponed Evaluation of Annotations' matches the wording exactly but is Superseded by 649 (Final, 3.14)."},
-  {"qid": "q17", "text": "which standard library module provides IANA time zone data", "category": "identifier", "relevant": [615], "python_version": "3.9", "trap": true, "note": "PEP 431 (Superseded) preceded 615 (zoneinfo, Final, 3.9)."},
-  {"qid": "q18", "text": "how do I define an enumeration type", "category": "identifier", "relevant": [435], "python_version": "3.4", "trap": true, "note": "PEP 354 'Enumerations in Python' is Superseded by 435."},
-  {"qid": "q19", "text": "why was asyncio added to the standard library", "category": "rationale", "relevant": [3156], "python_version": "3.3", "trap": true, "note": "PEP 3153 (Superseded) preceded 3156, the accepted asyncio design."},
-  {"qid": "q20", "text": "can I run multiple interpreters from the standard library", "category": "availability", "relevant": [734], "python_version": "3.14", "trap": true, "note": "PEP 554 has the same title and is Superseded by 734 (Final, 3.14)."},
-  {"qid": "q21", "text": "what is the current package metadata specification", "category": "identifier", "relevant": [566], "trap": true, "note": "Multi-hop chain: 241 -> 314 -> 345 -> 566. Two intermediate hops are themselves Superseded, so a single-step authority check is insufficient."},
-  {"qid": "q22", "text": "which manylinux platform tag should a wheel target", "category": "identifier", "relevant": [600], "trap": true, "note": "Three superseded tags (513, 571, 599) all converge on 600."},
-  {"qid": "q23", "text": "how are Python package version numbers compared", "category": "rationale", "relevant": [440], "trap": true, "note": "PEP 386 (Superseded) preceded 440."},
-  {"qid": "q24", "text": "is return allowed inside a finally block", "category": "rationale", "relevant": [765], "python_version": "3.14", "trap": true, "note": "PEP 601 proposed this and was Rejected; 765 (Final, 3.14) is the accepted version."},
-  {"qid": "q25", "text": "what file format records resolved Python dependencies", "category": "identifier", "relevant": [751], "trap": true, "note": "PEP 665 was Rejected; 751 is Final."},
-  {"qid": "q26", "text": "how do I declare dependencies inside a single file script", "category": "identifier", "relevant": [723], "trap": true, "note": "PEP 722 was Rejected in favour of 723."},
-  {"qid": "q27", "text": "what is the current WSGI specification", "category": "availability", "relevant": [3333], "trap": true, "note": "Hard case: PEP 333 and 3333 are BOTH Final. Authority here is recency, not status -- a status-only check cannot separate them."},
-  {"qid": "q28", "text": "how do I suppress the context of a raised exception", "category": "rationale", "relevant": [415], "python_version": "3.3", "trap": true, "note": "Second both-Final case: 409 was superseded by 415 in implementation terms while retaining Final status."},
-  {"qid": "q29", "text": "how do I do simple template based string substitution", "category": "identifier", "relevant": [292], "python_version": "2.4", "trap": true, "note": "PEP 215 'String Interpolation' is Superseded by 292."},
-  {"qid": "q30", "text": "is there a unified TLS API in Python", "category": "availability", "relevant": [748, 543], "python_version": "3.14", "trap": true, "note": "Deliberate no-authoritative-answer case: 543 is Withdrawn and its successor 748 is only a Draft. A correct system should decline to present either as settled."},
-
-  {"qid": "q31", "text": "which Python version introduced the with statement", "category": "availability", "relevant": [343], "python_version": "2.5", "trap": false, "note": "PEP 343, Final, 2.5."},
-  {"qid": "q32", "text": "when was yield from added for delegating to a subgenerator", "category": "availability", "relevant": [380], "python_version": "3.3", "trap": false, "note": "PEP 380, Final, 3.3."},
-  {"qid": "q33", "text": "which release added exception groups and the except star syntax", "category": "availability", "relevant": [654], "python_version": "3.11", "trap": false, "note": "PEP 654, Final, 3.11."},
-  {"qid": "q34", "text": "can I use builtin list and dict directly in type hints", "category": "availability", "relevant": [585], "python_version": "3.9", "trap": false, "note": "PEP 585, Final, 3.9."},
-  {"qid": "q35", "text": "which version added syntax for positional only parameters", "category": "availability", "relevant": [570], "python_version": "3.8", "trap": false, "note": "PEP 570, Final, 3.8."},
-  {"qid": "q36", "text": "is the global interpreter lock optional in any Python release", "category": "availability", "relevant": [703], "python_version": "3.13", "trap": false, "note": "PEP 703, Final, 3.13."},
-  {"qid": "q37", "text": "when did asynchronous generators become available", "category": "availability", "relevant": [525], "python_version": "3.6", "trap": false, "note": "PEP 525, Final, 3.6."},
-  {"qid": "q38", "text": "how do I declare a TypedDict for a dictionary with fixed keys", "category": "identifier", "relevant": [589], "python_version": "3.8", "trap": false, "note": "PEP 589, Final, 3.8."},
-  {"qid": "q39", "text": "what does the Self type annotation mean", "category": "identifier", "relevant": [673], "python_version": "3.11", "trap": false, "note": "PEP 673, Final, 3.11."},
-  {"qid": "q40", "text": "why was a dedicated infix operator added for matrix multiplication", "category": "rationale", "relevant": [465], "python_version": "3.5", "trap": false, "note": "PEP 465, Final, 3.5."},
-  {"qid": "q41", "text": "why were abstract base classes introduced", "category": "rationale", "relevant": [3119], "python_version": "3.0", "trap": false, "note": "PEP 3119, Final, 3.0."},
-  {"qid": "q42", "text": "why were comprehensions inlined instead of using a nested function", "category": "rationale", "relevant": [709], "python_version": "3.12", "trap": false, "note": "PEP 709, Final, 3.12."},
-  {"qid": "q43", "text": "what problem does Annotated solve for function and variable annotations", "category": "rationale", "relevant": [593], "python_version": "3.9", "trap": false, "note": "PEP 593, Final, 3.9."},
-  {"qid": "q44", "text": "why add an explicit way to declare type aliases", "category": "rationale", "relevant": [613], "python_version": "3.10", "trap": false, "note": "PEP 613, Final, 3.10."},
-  {"qid": "q45", "text": "why was a dedicated type parameter syntax added to the language", "category": "rationale", "relevant": [695], "python_version": "3.12", "trap": false, "note": "PEP 695, Final, 3.12."}
+ {
+  "qid": "q01",
+  "text": "can I use structural pattern matching in Python 3.9",
+  "category": "availability",
+  "relevant": [
+   634,
+   636
+  ],
+  "trap": true,
+  "note": "PEP 622 is titled exactly 'Structural Pattern Matching' and is Superseded by 634. Correct answer: no, 3.10.",
+  "asked_version": "3.9"
+ },
+ {
+  "qid": "q02",
+  "text": "what does the walrus operator := do",
+  "category": "identifier",
+  "relevant": [
+   572
+  ],
+  "trap": false,
+  "note": "PEP 572, Final, 3.8."
+ },
+ {
+  "qid": "q03",
+  "text": "why was the print statement changed into a function",
+  "category": "rationale",
+  "relevant": [
+   3105
+  ],
+  "trap": false,
+  "note": "PEP 3105, Final, 3.0."
+ },
+ {
+  "qid": "q04",
+  "text": "which Python version added f-strings for literal string interpolation",
+  "category": "availability",
+  "relevant": [
+   498
+  ],
+  "trap": false,
+  "note": "PEP 498, Final, 3.6."
+ },
+ {
+  "qid": "q05",
+  "text": "how do I write a union type using the pipe operator",
+  "category": "identifier",
+  "relevant": [
+   604
+  ],
+  "trap": false,
+  "note": "PEP 604, Final, 3.10."
+ },
+ {
+  "qid": "q06",
+  "text": "does Python have a switch case statement",
+  "category": "rationale",
+  "relevant": [
+   3103,
+   634
+  ],
+  "trap": true,
+  "note": "PEP 3103 is Rejected. The live answer is match/case via 634."
+ },
+ {
+  "qid": "q07",
+  "text": "what are data classes and how are they declared",
+  "category": "identifier",
+  "relevant": [
+   557
+  ],
+  "trap": false,
+  "note": "PEP 557, Final, 3.7."
+ },
+ {
+  "qid": "q08",
+  "text": "why does Python use structural subtyping for protocols instead of nominal typing",
+  "category": "rationale",
+  "relevant": [
+   544
+  ],
+  "trap": false,
+  "note": "PEP 544, Final, 3.8."
+ },
+ {
+  "qid": "q09",
+  "text": "when did true division become the default behaviour of the division operator",
+  "category": "availability",
+  "relevant": [
+   238
+  ],
+  "trap": false,
+  "note": "PEP 238, Final, 2.2, default in 3.0."
+ },
+ {
+  "qid": "q10",
+  "text": "how are coroutines defined with async and await syntax",
+  "category": "identifier",
+  "relevant": [
+   492
+  ],
+  "trap": false,
+  "note": "PEP 492, Final, 3.5."
+ },
+ {
+  "qid": "q11",
+  "text": "what are the conventions for writing docstrings",
+  "category": "identifier",
+  "relevant": [
+   257
+  ],
+  "trap": false,
+  "note": "PEP 257, Active."
+ },
+ {
+  "qid": "q12",
+  "text": "are template literal strings available in Python",
+  "category": "availability",
+  "relevant": [
+   750
+  ],
+  "trap": true,
+  "note": "PEP 501 is Withdrawn, Superseded-By 750. Only 750 (Final, 3.14) is authoritative."
+ },
+ {
+  "qid": "q13",
+  "text": "how were function annotations specified before type hints",
+  "category": "rationale",
+  "relevant": [
+   3107,
+   484
+  ],
+  "trap": false,
+  "note": "3107 (3.0) introduced the syntax; 484 (3.5) gave it typing semantics."
+ },
+ {
+  "qid": "q14",
+  "text": "what is the recommended maximum line length for Python code",
+  "category": "identifier",
+  "relevant": [
+   8
+  ],
+  "trap": false,
+  "note": "PEP 8, Active."
+ },
+ {
+  "qid": "q15",
+  "text": "what does the revised buffer protocol change",
+  "category": "rationale",
+  "relevant": [
+   3118
+  ],
+  "trap": false,
+  "note": "PEP 3118, Final, 3.0."
+ },
+ {
+  "qid": "q16",
+  "text": "how do I postpone the evaluation of annotations",
+  "category": "availability",
+  "relevant": [
+   649
+  ],
+  "trap": true,
+  "note": "PEP 563 'Postponed Evaluation of Annotations' matches the wording exactly but is Superseded by 649 (Final, 3.14)."
+ },
+ {
+  "qid": "q17",
+  "text": "which standard library module provides IANA time zone data",
+  "category": "identifier",
+  "relevant": [
+   615
+  ],
+  "trap": true,
+  "note": "PEP 431 (Superseded) preceded 615 (zoneinfo, Final, 3.9)."
+ },
+ {
+  "qid": "q18",
+  "text": "how do I define an enumeration type",
+  "category": "identifier",
+  "relevant": [
+   435
+  ],
+  "trap": true,
+  "note": "PEP 354 'Enumerations in Python' is Superseded by 435."
+ },
+ {
+  "qid": "q19",
+  "text": "why was asyncio added to the standard library",
+  "category": "rationale",
+  "relevant": [
+   3156
+  ],
+  "trap": true,
+  "note": "PEP 3153 (Superseded) preceded 3156, the accepted asyncio design."
+ },
+ {
+  "qid": "q20",
+  "text": "can I run multiple interpreters from the standard library",
+  "category": "availability",
+  "relevant": [
+   734
+  ],
+  "trap": true,
+  "note": "PEP 554 has the same title and is Superseded by 734 (Final, 3.14)."
+ },
+ {
+  "qid": "q21",
+  "text": "what is the current package metadata specification",
+  "category": "identifier",
+  "relevant": [
+   566
+  ],
+  "trap": true,
+  "note": "Multi-hop chain: 241 -> 314 -> 345 -> 566. Two intermediate hops are themselves Superseded, so a single-step authority check is insufficient."
+ },
+ {
+  "qid": "q22",
+  "text": "which manylinux platform tag should a wheel target",
+  "category": "identifier",
+  "relevant": [
+   600
+  ],
+  "trap": true,
+  "note": "Three superseded tags (513, 571, 599) all converge on 600."
+ },
+ {
+  "qid": "q23",
+  "text": "how are Python package version numbers compared",
+  "category": "rationale",
+  "relevant": [
+   440
+  ],
+  "trap": true,
+  "note": "PEP 386 (Superseded) preceded 440."
+ },
+ {
+  "qid": "q24",
+  "text": "is return allowed inside a finally block",
+  "category": "rationale",
+  "relevant": [
+   765
+  ],
+  "trap": true,
+  "note": "PEP 601 proposed this and was Rejected; 765 (Final, 3.14) is the accepted version."
+ },
+ {
+  "qid": "q25",
+  "text": "what file format records resolved Python dependencies",
+  "category": "identifier",
+  "relevant": [
+   751
+  ],
+  "trap": true,
+  "note": "PEP 665 was Rejected; 751 is Final."
+ },
+ {
+  "qid": "q26",
+  "text": "how do I declare dependencies inside a single file script",
+  "category": "identifier",
+  "relevant": [
+   723
+  ],
+  "trap": true,
+  "note": "PEP 722 was Rejected in favour of 723."
+ },
+ {
+  "qid": "q27",
+  "text": "what is the current WSGI specification",
+  "category": "availability",
+  "relevant": [
+   3333
+  ],
+  "trap": true,
+  "note": "Hard case: PEP 333 and 3333 are BOTH Final. Authority here is recency, not status -- a status-only check cannot separate them."
+ },
+ {
+  "qid": "q28",
+  "text": "how do I suppress the context of a raised exception",
+  "category": "rationale",
+  "relevant": [
+   415
+  ],
+  "trap": true,
+  "note": "Second both-Final case: 409 was superseded by 415 in implementation terms while retaining Final status."
+ },
+ {
+  "qid": "q29",
+  "text": "how do I do simple template based string substitution",
+  "category": "identifier",
+  "relevant": [
+   292
+  ],
+  "trap": true,
+  "note": "PEP 215 'String Interpolation' is Superseded by 292."
+ },
+ {
+  "qid": "q30",
+  "text": "is there a unified TLS API in Python",
+  "category": "availability",
+  "relevant": [
+   748,
+   543
+  ],
+  "trap": true,
+  "note": "Deliberate no-authoritative-answer case: 543 is Withdrawn and its successor 748 is only a Draft. A correct system should decline to present either as settled."
+ },
+ {
+  "qid": "q31",
+  "text": "which Python version introduced the with statement",
+  "category": "availability",
+  "relevant": [
+   343
+  ],
+  "trap": false,
+  "note": "PEP 343, Final, 2.5."
+ },
+ {
+  "qid": "q32",
+  "text": "when was yield from added for delegating to a subgenerator",
+  "category": "availability",
+  "relevant": [
+   380
+  ],
+  "trap": false,
+  "note": "PEP 380, Final, 3.3."
+ },
+ {
+  "qid": "q33",
+  "text": "which release added exception groups and the except star syntax",
+  "category": "availability",
+  "relevant": [
+   654
+  ],
+  "trap": false,
+  "note": "PEP 654, Final, 3.11."
+ },
+ {
+  "qid": "q34",
+  "text": "can I use builtin list and dict directly in type hints",
+  "category": "availability",
+  "relevant": [
+   585
+  ],
+  "trap": false,
+  "note": "PEP 585, Final, 3.9."
+ },
+ {
+  "qid": "q35",
+  "text": "which version added syntax for positional only parameters",
+  "category": "availability",
+  "relevant": [
+   570
+  ],
+  "trap": false,
+  "note": "PEP 570, Final, 3.8."
+ },
+ {
+  "qid": "q36",
+  "text": "is the global interpreter lock optional in any Python release",
+  "category": "availability",
+  "relevant": [
+   703
+  ],
+  "trap": false,
+  "note": "PEP 703, Final, 3.13."
+ },
+ {
+  "qid": "q37",
+  "text": "when did asynchronous generators become available",
+  "category": "availability",
+  "relevant": [
+   525
+  ],
+  "trap": false,
+  "note": "PEP 525, Final, 3.6."
+ },
+ {
+  "qid": "q38",
+  "text": "how do I declare a TypedDict for a dictionary with fixed keys",
+  "category": "identifier",
+  "relevant": [
+   589
+  ],
+  "trap": false,
+  "note": "PEP 589, Final, 3.8."
+ },
+ {
+  "qid": "q39",
+  "text": "what does the Self type annotation mean",
+  "category": "identifier",
+  "relevant": [
+   673
+  ],
+  "trap": false,
+  "note": "PEP 673, Final, 3.11."
+ },
+ {
+  "qid": "q40",
+  "text": "why was a dedicated infix operator added for matrix multiplication",
+  "category": "rationale",
+  "relevant": [
+   465
+  ],
+  "trap": false,
+  "note": "PEP 465, Final, 3.5."
+ },
+ {
+  "qid": "q41",
+  "text": "why were abstract base classes introduced",
+  "category": "rationale",
+  "relevant": [
+   3119
+  ],
+  "trap": false,
+  "note": "PEP 3119, Final, 3.0."
+ },
+ {
+  "qid": "q42",
+  "text": "why were comprehensions inlined instead of using a nested function",
+  "category": "rationale",
+  "relevant": [
+   709
+  ],
+  "trap": false,
+  "note": "PEP 709, Final, 3.12."
+ },
+ {
+  "qid": "q43",
+  "text": "what problem does Annotated solve for function and variable annotations",
+  "category": "rationale",
+  "relevant": [
+   593
+  ],
+  "trap": false,
+  "note": "PEP 593, Final, 3.9."
+ },
+ {
+  "qid": "q44",
+  "text": "why add an explicit way to declare type aliases",
+  "category": "rationale",
+  "relevant": [
+   613
+  ],
+  "trap": false,
+  "note": "PEP 613, Final, 3.10."
+ },
+ {
+  "qid": "q45",
+  "text": "why was a dedicated type parameter syntax added to the language",
+  "category": "rationale",
+  "relevant": [
+   695
+  ],
+  "trap": false,
+  "note": "PEP 695, Final, 3.12."
+ },
+ {
+  "qid": "q46",
+  "text": "can I use the walrus operator in Python 3.7",
+  "category": "availability",
+  "relevant": [
+   572
+  ],
+  "asked_version": "3.7",
+  "trap": false,
+  "note": "PEP 572 is 3.8, so the answer must say 3.8, not yes."
+ },
+ {
+  "qid": "q47",
+  "text": "is zoneinfo available in Python 3.8",
+  "category": "availability",
+  "relevant": [
+   615
+  ],
+  "asked_version": "3.8",
+  "trap": true,
+  "note": "PEP 615 is 3.9 (answer: no). PEP 431 (Superseded) is the trap."
+ },
+ {
+  "qid": "q48",
+  "text": "can I use match statements in Python 3.10",
+  "category": "availability",
+  "relevant": [
+   634
+  ],
+  "asked_version": "3.10",
+  "trap": true,
+  "note": "Genuinely yes, 3.10. PEP 622 (Superseded) is the trap. Included so the version check is not all negatives."
+ },
+ {
+  "qid": "q49",
+  "text": "are dataclasses available in Python 3.6",
+  "category": "availability",
+  "relevant": [
+   557
+  ],
+  "asked_version": "3.6",
+  "trap": false,
+  "note": "PEP 557 is 3.7 (answer: no)."
+ },
+ {
+  "qid": "q50",
+  "text": "can I use except star in Python 3.10",
+  "category": "availability",
+  "relevant": [
+   654
+  ],
+  "asked_version": "3.10",
+  "trap": false,
+  "note": "PEP 654 is 3.11 (answer: no)."
+ },
+ {
+  "qid": "q51",
+  "text": "is TypedDict available in Python 3.7",
+  "category": "availability",
+  "relevant": [
+   589
+  ],
+  "asked_version": "3.7",
+  "trap": false,
+  "note": "PEP 589 is 3.8 (answer: no)."
+ }
 ]
