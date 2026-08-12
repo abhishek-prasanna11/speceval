@@ -32,6 +32,11 @@ class Result:
     per_category: dict[str, Scores] = field(default_factory=dict)
     latency_p50_ms: float = 0.0
     latency_p95_ms: float = 0.0
+    # Fraction of queries whose rank-1 PEP is Rejected/Withdrawn/Superseded/Deferred.
+    # This is a *retrieval-side proxy* for the superseded-citation rate that Phase 3 will
+    # measure on generated answers -- available now, with no LLM in the loop, and it makes
+    # the authority problem visible one rung at a time instead of only at the end.
+    trap_at_1: float | None = None
 
 
 def _percentile(sorted_values: list[float], fraction: float) -> float:
@@ -43,10 +48,16 @@ def _percentile(sorted_values: list[float], fraction: float) -> float:
     return sorted_values[index]
 
 
-def evaluate(retriever: Retriever, queries: list[Query], k: int = K) -> Result:
+def evaluate(
+    retriever: Retriever,
+    queries: list[Query],
+    k: int = K,
+    non_authoritative: set[int] | None = None,
+) -> Result:
     recalls: list[float] = []
     ndcgs: list[float] = []
     latencies_ms: list[float] = []
+    traps: list[float] = []
     by_category: dict[str, list[tuple[float, float]]] = defaultdict(list)
 
     for query in queries:
@@ -62,6 +73,9 @@ def evaluate(retriever: Retriever, queries: list[Query], k: int = K) -> Result:
         ndcgs.append(ndcg)
         by_category[query.category].append((recall, ndcg))
 
+        if non_authoritative is not None:
+            traps.append(1.0 if ranked and ranked[0] in non_authoritative else 0.0)
+
     latencies_ms.sort()
     return Result(
         retriever=retriever.name,
@@ -74,19 +88,21 @@ def evaluate(retriever: Retriever, queries: list[Query], k: int = K) -> Result:
         },
         latency_p50_ms=_percentile(latencies_ms, 0.50),
         latency_p95_ms=_percentile(latencies_ms, 0.95),
+        trap_at_1=mean(traps) if traps else None,
     )
 
 
 def format_table(results: list[Result], k: int = K) -> str:
     lines = [
         f"{'Retriever':<12} {'Recall@' + str(k):>10} {'nDCG@' + str(k):>10} "
-        f"{'p50 ms':>9} {'p95 ms':>9}",
-        "-" * 54,
+        f"{'trap@1':>8} {'p50 ms':>9} {'p95 ms':>9}",
+        "-" * 63,
     ]
     for result in results:
+        trap = "-" if result.trap_at_1 is None else f"{result.trap_at_1:.3f}"
         lines.append(
             f"{result.retriever:<12} {result.overall.recall:>10.3f} "
-            f"{result.overall.ndcg:>10.3f} {result.latency_p50_ms:>9.2f} "
+            f"{result.overall.ndcg:>10.3f} {trap:>8} {result.latency_p50_ms:>9.2f} "
             f"{result.latency_p95_ms:>9.2f}"
         )
     return "\n".join(lines)

@@ -19,7 +19,7 @@ from speceval.metrics import ndcg_at_k, recall_at_k
 from speceval.retrievers import OracleRetriever, Query, RandomRetriever, load_queries
 
 REPO_ROOT = Path(__file__).resolve().parent.parent
-SEED_QUERIES = REPO_ROOT / "eval" / "queries_seed.json"
+GOLD_QUERIES = REPO_ROOT / "eval" / "queries_gold.json"
 
 
 class TestRecall(unittest.TestCase):
@@ -89,12 +89,12 @@ class TestHarnessAgainstSyntheticRetrievers(unittest.TestCase):
 
     @classmethod
     def setUpClass(cls) -> None:
-        cls.queries = load_queries(SEED_QUERIES)
+        cls.queries = load_queries(GOLD_QUERIES)
 
-    def test_seed_set_is_well_formed(self) -> None:
+    def test_gold_set_is_well_formed(self) -> None:
         self.assertGreater(len(self.queries), 0)
         qids = [q.qid for q in self.queries]
-        self.assertEqual(len(qids), len(set(qids)), "duplicate qid in seed set")
+        self.assertEqual(len(qids), len(set(qids)), "duplicate qid in gold set")
         for query in self.queries:
             self.assertTrue(query.relevant, f"{query.qid} has no labels")
             self.assertIn(query.category, {"availability", "rationale", "identifier"})

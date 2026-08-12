@@ -35,7 +35,7 @@ def main() -> int:
         return 1
 
     chunks = chunk_corpus(peps)
-    queries = load_queries(REPO_ROOT / "eval" / "queries_seed.json")
+    queries = load_queries(REPO_ROOT / "eval" / "queries_gold.json")
 
     statuses = Counter(pep.status for pep in peps)
     non_authoritative = sum(count for s, count in statuses.items() if s in NON_AUTHORITATIVE)

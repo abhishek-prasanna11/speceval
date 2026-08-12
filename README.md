@@ -105,40 +105,57 @@ Three things separate measured results from asserted ones:
 
 ## Results
 
-Phase 1 measured; the citation metrics arrive with generation in Phase 3.
+Rungs 1–3 measured on 45 gold queries. The citation metrics arrive with generation in
+Phase 3.
 
 **Corpus:** 734 PEPs → 19,763 chunks. 519 (71%) carry `Python-Version`; 31 carry
 `Superseded-By`. **262 PEPs (36%) are non-authoritative** — Rejected 131, Withdrawn 70,
 Deferred 36, Superseded 25. That is the trap surface.
 
-| Strategy | Recall@10 | nDCG@10 | Superseded-cite | Version-correct | Retrieval p95 |
-|---|---|---|---|---|---|
-| BM25 | **0.933** | **0.644** | — | — | **15.3 ms** |
-| Dense | — | — | — | — | — |
-| Hybrid | — | — | — | — | — |
-| Hybrid + reranking | — | — | — | — | — |
+| Strategy | Recall@10 | nDCG@10 | trap@1 | Superseded-cite | Version-correct | Retrieval p95 |
+|---|---|---|---|---|---|---|
+| BM25 | 0.889 | 0.710 | 0.289 | — | — | 18.0 ms |
+| Dense | **0.967** | **0.830** | **0.244** | — | — | 40.7 ms |
+| Hybrid | 0.944 | 0.810 | 0.289 | — | — | 20.2 ms |
+| Hybrid + reranking | — | — | — | — | — | — |
 
-Harness validation, run as tests: Oracle scores 1.000/1.000, Random scores 0.000/0.000.
+`trap@1` = fraction of queries whose rank-1 PEP is non-authoritative — a retrieval-side
+proxy for the Phase 3 citation metrics. Harness validation, run as tests: Oracle scores
+1.000/1.000, Random scores 0.000/0.000.
 
-**Two findings already.** First, recall 0.933 against nDCG 0.644 means BM25 *finds* the
-right PEPs and *ranks them badly* — so the headroom is in ordering, and the Phase 4
-tradeoff will be about nDCG and citation correctness rather than recall collapse. Second,
-**7 of 15 seed queries return a non-authoritative PEP at rank 1**, with no LLM involved
-yet: a query about the walrus operator tops out at PEP 622 (`Superseded`, and about pattern
-matching), and the pattern-matching query itself ranks 622 above the live spec 634, because
-622 is titled exactly "Structural Pattern Matching" while 634 adds ": Specification".
+**Finding — better retrieval did not buy better authority.** Dense beats BM25 on every
+retrieval metric (rank-1 accuracy 66.7% vs 51.1%). But split by subset, that advantage
+does not transfer: on the 27 *ordinary* queries dense takes trap@1 from 0.15 to 0.04, while
+on the 18 *trap* queries the two are indistinguishable — 10 of 18 versus 9 of 18. Roughly
+half of trap queries lead with a dead PEP no matter which retriever runs.
 
-Per category, rationale questions are much weaker (Recall 0.80 / nDCG 0.56) than
-availability (1.00 / 0.72) or identifier (1.00 / 0.66) — an effect the aggregate hides
-entirely. Details in [`notes/phase1.md`](notes/phase1.md).
+The mechanism shows in where they diverge. Dense and BM25 fall into *different* traps, and
+the dense-only ones share a shape: for "how do I postpone the evaluation of annotations",
+the superseded PEP 563 is titled *Postponed Evaluation of Annotations* while the live answer
+PEP 649 is titled *Deferred Evaluation Of Annotations Using Descriptors*. BM25 matched the
+live PEP; the embedding matched the dead one. **The better a retriever is at semantics, the
+more attractive a superseded predecessor becomes** — it is on-topic, often better-titled,
+and frequently better prose. So the authority problem is not a retrieval-quality problem,
+which is the argument for rung 4 existing at all.
+
+**Finding — hybrid did not beat dense.** RRF fusion produced no measurable gain over dense
+alone, against the received wisdom that hybrid beats either component. The likely cause is
+that RRF weights both systems equally while BM25 is substantially weaker here, and a
+rank-only rule cannot express "trust dense more".
+
+**Stated carefully:** at n=45, several of these gaps are one or two queries and are not
+findings. The subset split and the divergence mechanism are the robust parts; the exact
+margins are not. Full analysis, the failed Phase 1 prediction, and limitations in
+[`notes/phase2.md`](notes/phase2.md).
 
 ## Roadmap
 
 - [x] **Phase 1** — Ingest `python/peps`, parse headers, chunk, hand-rolled BM25, Recall@10 and
       nDCG@10 harness. Retrieval only, no LLM. Includes the harness validation above.
-      *(Done: 34 tests, 15 seed queries, baseline measured.)*
-- [ ] **Phase 2** — Dense retrieval (brute-force cosine) and hybrid fusion. Rungs 1–3 measured.
-- [ ] **Phase 3** — Golden set of 40–60 categorised queries, generation, and the two
+      *(Done: baseline measured.)*
+- [x] **Phase 2** — Dense retrieval (brute-force cosine) and hybrid fusion. Rungs 1–3 measured.
+      *(Done: 57 tests, gold set expanded to 45 verified queries, 18 of them trap cases.)*
+- [ ] **Phase 3** — Generation over the retrieved context, and the two
       automatic citation metrics. Baseline error rates established.
 - [ ] **Phase 4** — Version/authority reranking with tunable strength. Sweep it, produce the
       tradeoff curve and the results table. Error analysis on losses.
@@ -181,16 +198,31 @@ dependency — it is short, and it keeps the lexical baseline inspectable.
 
 ## Running it
 
-No third-party dependencies — Python standard library only, through Phase 1.
+Phase 1 is standard library only. Phase 2 onward needs `numpy` (brute-force cosine) and a
+local Ollama server for embeddings.
 
 ```bash
-./scripts/fetch_corpus.sh              # shallow-clones python/peps into peps/ (gitignored)
-python3 -m unittest discover -s tests  # 34 tests, including the harness validation
-python3 run_phase1.py                  # corpus stats + the BM25 baseline table
+python3 -m venv .venv                        # project-local, so versions are pinned here
+.venv/bin/python -m pip install -r requirements.txt
+./scripts/fetch_corpus.sh                    # shallow-clones python/peps (gitignored)
+
+.venv/bin/python -m unittest discover -s tests   # 57 tests, incl. harness validation
+.venv/bin/python run_phase1.py                   # corpus stats + BM25 baseline
+
+ollama serve &                               # required from Phase 2: embeddings
+.venv/bin/python run_phase2.py               # the ladder: BM25 / Dense / Hybrid
 ```
+
+`requirements.txt` carries a loose floor; `requirements-lock.txt` pins the exact versions
+used to produce the reported numbers (numpy 2.5.2, Python 3.14.3, macOS/arm64). The first
+`run_phase2.py` embeds all 19,763 chunks — roughly 11 minutes — then caches the vectors
+under `.cache/`, so later runs start instantly.
 
 ## Status
 
-**Phase 1 complete (2026-08-12).** Corpus ingestion, chunking, hand-rolled BM25, the
-metric harness and its validation, 15 hand-labelled seed queries, 34 tests passing.
-Phase 2 next: dense retrieval and hybrid fusion.
+**Phases 1–2 complete (2026-08-13).** Corpus ingestion, chunking, hand-rolled BM25, dense
+retrieval, RRF hybrid fusion, the metric harness and its validation, a 45-query gold set
+with every label re-derived from the corpus by `scripts/verify_gold.py`, and 57 tests
+passing. Rungs 1–3 of the ladder are measured.
+
+Phase 3 next: generation, plus the superseded-citation and version-correctness metrics.
