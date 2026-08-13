@@ -249,9 +249,12 @@ wrong and are recorded as wrong. Full analysis in
 
 ## What this is not
 
-Scope guards, so the project cannot quietly regrow:
+Scope guards on **the study**, so it cannot quietly regrow:
 
-- **Not a chatbot.** No UI, no conversation, no memory. The deliverable is a results table.
+- **The measured pipeline is not a chatbot.** No conversation, no memory, no per-query tuning.
+  The deliverable is a results table. (A demo entry point exists — see *Try it* below — but it
+  is a thin composition of the measured modules, adds no retrieval logic of its own, and no
+  driver imports it.)
 - **Not an agent.** No tool use, no planning loop.
 - **No vector database and no ANN index.** Brute-force cosine over a few thousand chunks is
   correct at this scale; an HNSW index here would be decoration.
@@ -307,6 +310,26 @@ ollama serve &                               # required from Phase 2: embeddings
 used to produce the reported numbers (numpy 2.5.2, Python 3.14.3, macOS/arm64). The first
 `run_phase2.py` embeds all 19,763 chunks — roughly 11 minutes — then caches the vectors
 under `.cache/`, so later runs start instantly.
+
+## Try it
+
+The four drivers only run the 51 gold queries. To ask the finished system something else:
+
+```bash
+.venv/bin/python ask.py "how should I specify the build backend for a package"
+
+# the same question without and with authority reranking, side by side
+.venv/bin/python ask.py --compare "how do I postpone the evaluation of annotations"
+
+.venv/bin/python serve.py          # minimal web UI on http://localhost:8000
+```
+
+Compare mode is the point: it shows what a conventional RAG pipeline returns next to what this
+study's intervention returns. On the annotations query the left column cites PEP 563
+(`Superseded`) and the right cites PEP 649 (`Final`).
+
+`ask.py`, `serve.py` and `speceval/pipeline.py` are **not part of the study** — nothing in them
+is measured and no driver imports them.
 
 ## Status
 
