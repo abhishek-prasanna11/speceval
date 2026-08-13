@@ -158,3 +158,24 @@ that model's documentation. Both are flagged where used.
 **Known discrepancy found and fixed during writing:** the repository's README reported retrieval
 numbers measured when the gold set held 45 queries, before six version-scoped queries were added.
 Those numbers were no longer reproducible. They were re-measured and corrected; see chapter 23.
+
+### Verification log
+
+Performed after all chapters were drafted:
+
+| Check | Result |
+|---|---|
+| Full test suite | **103 tests, all passing, 0.093 s** — run live |
+| Per-file test counts | answers 27, dense 23, rerank 19, corpus 17, harness 17 |
+| `scripts/verify_gold.py` | passes; 51 queries, 20 traps, 48 distinct PEPs |
+| All four drivers | run live; every number in Parts IV–V reproduced |
+| 29 constants asserted in the book | checked against source — **0 mismatches** |
+| Source line counts cited per chapter | checked — 2 stale figures in ch21 corrected |
+| Table-of-contents links | 24 links, all resolve; no unlinked chapter files |
+| Chapter 22's end-to-end trace | every stage produced by running the system |
+
+The 29 constants include `RRF_K`, `K1`/`B`, `MAX_CHUNK_CHARS`, the embedding batch size and
+dimensionality, both asymmetric prefixes, the generation seed/temperature/token cap, all nine
+`STATUS_WEIGHT` entries, `SUPERSEDED_BY_FACTOR`, `VERSION_PENALTY_FACTOR`,
+`DEFAULT_STATUS_WEIGHT`, both depth multipliers, the `NON_AUTHORITATIVE` set, and the BM25
+tokeniser pattern.

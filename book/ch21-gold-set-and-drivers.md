@@ -1,6 +1,6 @@
 # Chapter 21 — The Gold Set and the Drivers
 
-`eval/queries_gold.json` · `scripts/verify_gold.py` (138 lines) · `run_phase1–4.py` (643 lines)
+`eval/queries_gold.json` · `scripts/verify_gold.py` (138 lines) · `run_phase1–4.py` (647 lines)
 
 ## Learning Objectives
 
@@ -122,7 +122,7 @@ would catch.
 ## Deep Explanation: four drivers, not one
 
 ```
-   run_phase1.py   corpus statistics + BM25 baseline           (112 lines)
+   run_phase1.py   corpus statistics + BM25 baseline           (116 lines)
    run_phase2.py   the ladder, retrieval level                 (150 lines)
    run_phase3.py   the ladder, answer level                    (168 lines)
    run_phase4.py   rung 4 swept + ablation + per-query diff     (213 lines)
