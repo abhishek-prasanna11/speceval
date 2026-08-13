@@ -61,15 +61,19 @@ def main() -> int:
 
     print()
     print("=" * 54)
-    print(f"RETRIEVAL  (k={K}, {len(queries)} seed queries)")
+    print(f"RETRIEVAL  (k={K}, {len(queries)} gold queries)")
     print("=" * 54)
 
+    trap_peps = {pep.number for pep in peps if pep.status in NON_AUTHORITATIVE}
     results = [
-        evaluate(OracleRetriever(), queries, k=K),
+        evaluate(OracleRetriever(), queries, k=K, non_authoritative=trap_peps),
         evaluate(
-            RandomRetriever(pep_numbers=[pep.number for pep in peps]), queries, k=K
+            RandomRetriever(pep_numbers=[pep.number for pep in peps]),
+            queries,
+            k=K,
+            non_authoritative=trap_peps,
         ),
-        evaluate(BM25Retriever(chunks), queries, k=K),
+        evaluate(BM25Retriever(chunks), queries, k=K, non_authoritative=trap_peps),
     ]
     print(format_table(results, k=K))
     print()

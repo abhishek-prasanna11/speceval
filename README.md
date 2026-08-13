@@ -119,13 +119,14 @@ Rungs 1–3 measured on 51 gold queries, at both the retrieval and the answer le
 `Superseded-By`. **262 PEPs (36%) are non-authoritative** — Rejected 131, Withdrawn 70,
 Deferred 36, Superseded 25. That is the trap surface.
 
-**Retrieval level** (45-query set; `trap@1` = fraction whose rank-1 PEP is non-authoritative):
+**Retrieval level** (51-query gold set; `trap@1` = fraction whose rank-1 PEP is
+non-authoritative):
 
-| Strategy | Recall@10 | nDCG@10 | trap@1 | Retrieval p95 |
-|---|---|---|---|---|
-| BM25 | 0.889 | 0.710 | 0.289 | 18.0 ms |
-| Dense | **0.967** | **0.830** | **0.244** | 40.7 ms |
-| Hybrid | 0.944 | 0.810 | 0.289 | 20.2 ms |
+| Strategy | Recall@10 | nDCG@10 | trap@1 | rank-1 correct | Retrieval p95 |
+|---|---|---|---|---|---|
+| BM25 | 0.863 | 0.671 | 0.294 | 47.1% | 42.6 ms |
+| Dense | **0.971** | **0.801** | **0.255** | **60.8%** | 45.2 ms |
+| Hybrid | 0.931 | 0.765 | 0.294 | 56.9% | 39.1 ms |
 
 **Answer level** (51 queries, 153 generated answers, temperature 0 and a fixed seed so
 run-to-run variance is zero):
@@ -138,6 +139,9 @@ run-to-run variance is zero):
 | **Hybrid + reranking** (λ=1) | **0.039** | **0.863** | 0.714 | **0.000** | — |
 
 Harness validation, run as tests: Oracle scores 1.000/1.000, Random scores 0.000/0.000.
+
+*End-to-end latency is measured on a cold answer cache. Re-running the drivers after
+`.cache/answers/` is populated reports ~1 ms, which is cache-read time, not generation.*
 
 **Rung 4, swept.** The reranker's strength is a knob, so the result is a curve. Retrieval level:
 
@@ -161,10 +165,10 @@ draws a 10x deeper pool before fusing, and λ=0 shared only 1 of 51 prompts with
 | 1.00 | **0.039** | **0.863** | **0.050** |
 
 **Finding — better retrieval did not buy better authority.** Dense beats BM25 on every
-retrieval metric (rank-1 accuracy 66.7% vs 51.1%). But split by subset, that advantage
-does not transfer: on the 27 *ordinary* queries dense takes trap@1 from 0.15 to 0.04, while
-on the 18 *trap* queries the two are indistinguishable — 10 of 18 versus 9 of 18. Roughly
-half of trap queries lead with a dead PEP no matter which retriever runs.
+retrieval metric (rank-1 accuracy 60.8% vs 47.1%). But split by subset, that advantage does
+not transfer: on the 31 *ordinary* queries dense takes trap@1 from 0.16 to 0.06, while on the
+20 *trap* queries it is very slightly **worse** — 11 of 20 versus BM25's 10 of 20. Over half of
+trap queries lead with a dead PEP no matter which retriever runs.
 
 The mechanism shows in where they diverge. Dense and BM25 fall into *different* traps, and
 the dense-only ones share a shape: for "how do I postpone the evaluation of annotations",

@@ -192,3 +192,44 @@ Generation, and the two citation metrics computed automatically from PEP headers
 superseded-citation rate and version correctness. The baseline to beat is now established
 and uncomfortable: roughly half of trap queries lead with a dead PEP regardless of retriever,
 so a generator fed the top-k will cite dead specifications at a measurable rate.
+
+
+---
+
+## Addendum — re-measured on the final 51-query gold set
+
+Everything above was measured when the gold set held **45** queries. Phase 3 added six
+version-scoped queries, so the repository as it stands cannot reproduce those numbers. Re-run
+on the final 51-query set:
+
+```
+Retriever     Recall@10    nDCG@10   trap@1   rank-1   p95 ms
+--------------------------------------------------------------
+BM25              0.863      0.671    0.294    47.1%     42.6
+Dense             0.971      0.801    0.255    60.8%     45.2
+Hybrid            0.931      0.765    0.294    56.9%     39.1
+```
+
+Trap subset (n=20) versus ordinary (n=31):
+
+```
+BM25       trap R 0.82 N 0.62 T 0.50   ordinary R 0.89 N 0.71 T 0.16
+Dense      trap R 0.93 N 0.67 T 0.55   ordinary R 1.00 N 0.89 T 0.06
+Hybrid     trap R 0.93 N 0.66 T 0.55   ordinary R 0.94 N 0.83 T 0.13
+```
+
+**Every conclusion in this document survives, and one strengthens.** Dense still wins every
+aggregate retrieval metric; hybrid still fails to beat dense; Random's trap@1 (0.333) still
+tracks the corpus base rate (36%); Oracle's is still non-zero (0.020 = q30) for the documented
+reason. The subset inversion is now slightly sharper rather than a tie: on trap queries dense
+is **worse** than BM25 (11 of 20 versus 10 of 20) while being far better on ordinary ones
+(0.06 versus 0.16). The divergence set also grew — dense-only traps q16, q22, q24, q47;
+BM25-only q02, q04, q15, q20, q28, q48; nine shared.
+
+Per-category nDCG@10 confirms the failed Phase 1 prediction again: dense wins *all three*
+categories, with the widest margin on rationale (0.81 vs 0.64) and the narrowest on
+identifier (0.86 vs 0.77) — the predicted direction, but not the predicted loss.
+
+Latency p50 also moved (BM25 11.97 ms → 27.88 ms) between runs on an otherwise idle machine.
+Retrieval latency here is measurement noise at the tens-of-milliseconds scale and should not
+be read as a difference between strategies beyond the dense/lexical gap.
